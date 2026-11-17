@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prisma Anatomy Assembly</title>
+<script type="importmap">
+{"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<style>
+/* Luminous green and red at the same OKLCH lightness and chroma as #FF9436 / #e07a1c / #ffb067. */
+:root{
+  --o:#3ecf55;--o:oklch(from #FF9436 l c 145);
+  --red:#ff4548;--red:oklch(from #FF9436 l c 25);
+  --od:#e23840;--od:oklch(from #e07a1c l c 25);
+  --pale:#c6f3c4;--pale:oklch(from #ffb067 l c 145);
+  --g:#D9D7D2;--k:#1A1A1A;--w:#fff
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0f0f0f;overflow:hidden;font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;color:var(--k)}
+#stage{position:absolute;left:0;top:0;width:736px;height:552px;--dy:0px;transform-origin:0 0;background:var(--g);overflow:hidden}
+#stage *{position:absolute;white-space:nowrap}
+#stage .wrap{white-space:normal}
+.t{font-size:7px;letter-spacing:.2px;line-height:1.2}
+.mi{font-size:4.5px;line-height:1.3;letter-spacing:.3px}
+#rail{left:0;top:0;bottom:0;width:52px;background:var(--k);color:#fff;z-index:30}
+#rail .ix{left:0;width:52px;text-align:center;font-size:15px;line-height:13px;font-weight:500;cursor:pointer}
+#rail .ix.on{color:var(--o)}
+#rail .hl{left:19px;width:14px;height:1px;background:#666}
+#up{left:18px;top:calc(505px + var(--dy));width:16px;height:16px;border:1px solid #fff;border-radius:50%;text-align:center;font-size:9px;line-height:14px;cursor:pointer}
+#hero{left:52px;top:0;bottom:0;width:218px;background:var(--o);z-index:5}
+#hero .h1{left:50px;top:31px;font-size:25px;line-height:26px;font-weight:500}
+#hero .p{background:var(--pale)}
+.bar{height:3px}
+#num{left:0;top:calc(var(--dy) / 2);width:736px;height:552px;z-index:12;pointer-events:none}
+#num path,#num polygon{fill:var(--k);pointer-events:auto;cursor:pointer}
+#view{left:270px;top:0;width:466px;height:552px;z-index:2}
+#view canvas{width:100%;height:100%;display:block;position:static}
+#pins{left:270px;top:0;width:466px;height:552px;z-index:15;pointer-events:none}
+.pin{width:15px;height:15px;border-radius:50%;background:var(--k);color:#fff;font-size:5.5px;line-height:15px;text-align:center;transform:translate(-50%,-50%);border:1px solid #fff;pointer-events:auto;cursor:pointer}
+#head{z-index:14}
+#head .ln{left:295px;right:46px;top:50px;height:1px;background:var(--k)}
+#head .tab{cursor:pointer}
+#foot{z-index:14}
+#ctl{left:384px;top:calc(500px + var(--dy));z-index:16;display:flex;gap:7px;align-items:center}
+#ctl *{position:static}
+#ctl button{font:inherit;font-size:5.5px;letter-spacing:.3px;background:none;border:1px solid var(--k);padding:2px 4px;cursor:pointer;color:var(--k)}
+#ctl button.on{background:var(--k);color:var(--o)}
+#ctl input{width:44px;height:6px;accent-color:var(--k)}
+#card{right:46px;top:52px;width:155px;height:206px;z-index:20;filter:drop-shadow(8px 8px 0 #b9b7b2)}
+#card .top{left:0;top:0;width:155px;height:166px;background:var(--red);overflow:hidden}
+#card .bot{left:0;top:166px;width:155px;height:40px;background:#fff;cursor:pointer}
+#rr{right:0;top:0;bottom:0;width:26px;background:var(--k);color:#fff;z-index:30}
+#rr .v{writing-mode:vertical-rl;transform:rotate(180deg);font-size:4.5px;letter-spacing:.5px;left:10px}
+#rr .dt{left:13px;width:0;border-left:1px dotted #777}
+#c-note{left:10px;top:112px;width:135px;font-weight:700;line-height:1.25;max-height:26px;overflow:hidden}
+body.portal #stage{background:#070a08}
+</style>
+</head>
+<body data-source="IanDev-cmd/Prisma-@677f8f0">
+<div id="stage">
+ <div id="view"></div>
+ <div id="pins"></div>
+
+ <div id="hero">
+  <div class="mi" style="left:6px;top:33px">PROJECT<br>ATELIER</div>
+  <div class="h1">PRISMA<br>ANATOMY<br>ASSEMBLY</div>
+  <div class="bar" style="left:50px;top:114px;width:33px;background:var(--k)"></div>
+  <div class="bar" style="left:83px;top:114px;width:80px;background:var(--od)"></div>
+  <div class="p" style="left:200px;top:118px;width:18px;height:38px;opacity:.7"></div>
+  <div class="p" style="left:8px;top:80px;width:16px;height:16px;opacity:.5"></div>
+  <div class="p" style="left:105px;top:298px;width:55px;height:34px;opacity:.55"></div>
+  <div class="mi" style="left:6px;top:calc(369px + var(--dy))">ORGAN<br>PLATE</div>
+  <div id="alias" style="left:50px;top:calc(369px + var(--dy));font-size:14px;line-height:17px;font-weight:500">CARDIOVASCULAR<br>COR<br>100,000 BEATS</div>
+  <div class="bar" style="left:50px;top:calc(426px + var(--dy));width:33px;background:var(--k)"></div>
+  <div class="bar" style="left:83px;top:calc(426px + var(--dy));width:80px;background:var(--od)"></div>
+  <div style="left:6px;top:calc(470px + var(--dy));width:34px;height:34px;background:radial-gradient(#8a2030 .7px,transparent .8px) 0 0/5px 5px;opacity:.7"></div>
+  <div class="mi" id="plateCode" style="left:48px;top:calc(514px + var(--dy))">AR-01</div>
+ </div>
+
+ <div id="rail">
+  <div style="left:0;width:52px;top:30px;text-align:center;font-size:15px;font-weight:500">PR</div>
+  <div class="ix on" data-m="iso" style="top:112px">AS<br>01</div><div class="hl" style="top:160px"></div>
+  <div class="ix" data-m="drone" style="top:203px">FL<br>02</div><div class="hl" style="top:258px"></div>
+  <div class="ix" data-m="orbit" style="top:296px">OR<br>03</div><div class="hl" style="top:350px"></div>
+  <div style="left:6px;top:366px;width:40px;height:50px;background:radial-gradient(#777 .6px,transparent .7px) 0 0/5px 5px;opacity:.5"></div>
+  <div id="up">↑</div>
+ </div>
+
+ <svg id="num" viewBox="0 0 736 552">
+  <path fill-rule="evenodd" d="M110 172H210L228 190V312L210 330H110L92 312V190ZM124 204V298H196V204Z"/>
+  <path fill-rule="evenodd" d="M250 172H340L358 190V252L340 270H250L232 252V190ZM274 198V244H324V198Z"/>
+  <polygon points="324,236 358,236 358,330 324,330"/>
+ </svg>
+
+ <div id="head">
+  <div class="t" style="left:295px;top:33px">TECHNICAL DRAWING</div>
+  <div class="t tab" id="evt" style="left:424px;top:33px" title="Toggle portal">LOADING 0/9</div>
+  <div class="ln"></div>
+  <div style="left:295px;top:52px;width:65px;height:3px;background:var(--o)"></div>
+  <div style="right:47px;top:34px;width:3px;height:3px;background:var(--k);border-radius:50%"></div>
+  <div style="right:47px;top:42px;width:3px;height:3px;background:var(--k);border-radius:50%"></div>
+  <div style="left:297px;top:calc(463px + var(--dy));width:15px;height:25px;background:#c9c7c2"></div>
+  <div style="left:297px;top:80px;width:12px;height:12px;background:#c9c7c2"></div>
+ </div>
+
+ <div id="foot">
+  <div class="t" style="left:295px;top:calc(504px + var(--dy));line-height:1.3">NTS<br>SCALE 1:2</div>
+  <div style="left:372px;top:calc(516px + var(--dy));width:2px;height:2px;background:var(--k)"></div>
+  <div style="left:378px;top:calc(516px + var(--dy));width:2px;height:2px;background:var(--k)"></div>
+  <div class="t" id="next" style="right:88px;top:calc(514px + var(--dy));cursor:pointer">NEXT PAGE</div>
+  <div style="right:48px;top:calc(517px + var(--dy));width:28px;height:1px;background:var(--k)"></div>
+ </div>
+ <div id="ctl">
+  <button data-m="iso" class="on" title="Key 1">ISO</button><button id="exb" title="Key E">EXPLODE</button><button data-m="drone" title="Key 2">DRONE</button><button data-m="orbit" title="Key 3">ORBIT</button><input id="exr" type="range" min="0" max="1" step=".01" value="0" title="Separation">
+ </div>
+
+ <div id="card">
+  <div class="top">
+   <svg style="left:10px;top:10px" width="32" height="32" viewBox="0 0 32 32"><polygon points="16,1 29,8.5 29,23.5 16,31 3,23.5 3,8.5" fill="#fff"/><path d="M9 11l7 4 7-4M16 15v9" stroke="var(--red)" stroke-width="3" fill="none"/></svg>
+   <div class="mi" id="c-kicker" style="left:50px;top:14px;color:var(--k)">01<br>CARDIOVASCULAR</div>
+   <div style="left:122px;top:12px;width:15px;height:15px;background:#fff;text-align:center;line-height:14px;font-size:11px;cursor:pointer" id="cls">×</div>
+   <div style="left:10px;top:44px;width:135px;height:2px;background:#fff"></div>
+   <div class="mi" id="c-loc" style="left:10px;top:52px">BEHIND THE STERNUM, SLIGHTLY LEFT</div>
+   <div id="c-title" style="left:10px;top:64px;font-size:21px;line-height:22px;font-weight:600">HEART</div>
+   <div id="c-latin" style="left:10px;top:88px;font-size:11px;letter-spacing:.4px;font-weight:600">COR</div>
+   <div style="left:10px;top:106px;width:135px;height:1px;background:var(--k)"></div>
+   <div class="mi wrap" id="c-note">CORONARY ARTERIES<br>IT BEATS ROUGHLY 2.5 BILLION TIMES IN AN AVERAGE LIFETIME.</div>
+   <div style="left:10px;top:150px;width:62px;height:5px;background:var(--k)"></div>
+   <div class="mi" id="c-spec" style="left:10px;top:140px;font-weight:700">250–350 G · CARDIAC MUSCLE</div>
+  </div>
+  <div class="bot"><div class="mi" id="c-go" style="left:14px;top:12px;font-weight:700">CIRCULATES OXYGENATED BLOOD &gt;</div><div style="left:14px;top:25px;width:127px;height:1px;background:var(--k)"></div></div>
+ </div>
+
+ <div id="rr">
+  <div class="v" id="plateNo" style="top:28px">PLATE 01</div><div class="dt" style="top:64px;height:30px"></div>
+  <div class="v" style="top:104px">CHAPTER 09</div><div class="dt" style="top:160px;height:calc(210px + var(--dy))"></div>
+  <div class="v" style="top:calc(390px + var(--dy))">OFFICIAL PRISMA ANATOMY PLATE</div>
+  <div style="left:11px;top:calc(516px + var(--dy));width:4px;height:4px;background:#fff"></div>
+ </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+
+const ORGANS=[
+ {id:'brain',file:'brain.glb',name:'BRAIN',latin:'ENCEPHALON',system:'NERVOUS SYSTEM',loc:'PROTECTED WITHIN THE SKULL',stamp:'20% OF ENERGY',weight:'1.3–1.4 KG',tissue:'CEREBRAL CORTEX',supply:'CAROTID AND VERTEBRAL ARTERIES',fn:'PROCESSES AND COORDINATES SIGNALS',poetic:'THE UNIVERSE WITHIN',medical:'Billions of neurons communicate through electrical and chemical signals.',daily:'Uses about 20% of the body’s energy.',fun:'It has no pain receptors of its own — a headache is felt in the tissues around it.',comparison:'Brain vs. eye',conditions:['Migraine','Stroke','Neurodegenerative disease','Epilepsy','Traumatic brain injury','Meningitis','Multiple sclerosis','Brain aneurysm'],tint:0,at:[0.15,2.75,0.05],dir:[0.2,1.2,0.08],amt:1.45,
+  hotspots:[
+   {id:'frontal',ta:'Lobus frontalis',label:'Frontal lobe',detail:'Planning and movement',position:[-0.7,0.65,0.8]},
+   {id:'parietal',ta:'Lobus parietalis',label:'Parietal lobe',detail:'Sensory integration',position:[0.15,1.1,0.65]},
+   {id:'temporal',ta:'Lobus temporalis',label:'Temporal lobe',detail:'Memory and hearing',position:[0.75,-0.1,0.82]},
+   {id:'cerebellum',ta:'Cerebellum',label:'Cerebellum',detail:'Balance and coordination',position:[0.72,-0.9,0.55]}
+  ]},
+ {id:'eyeball',file:'eyeball.glb',name:'EYE',latin:'OCULUS',system:'SENSORY SYSTEM',loc:'WITHIN THE BONY ORBIT',stamp:'24 MM ACROSS',weight:'AROUND 7.5 G',tissue:'RETINAL LAYERS',supply:'OPHTHALMIC ARTERY',fn:'CAPTURES AND FOCUSES LIGHT',poetic:'A WINDOW MADE OF LIGHT',medical:'The retina is an extension of the central nervous system.',daily:'Makes thousands of tiny movements.',fun:'The cornea carries no blood vessels at all; it takes oxygen directly from the air.',comparison:'Eye vs. brain',conditions:['Myopia','Cataract','Glaucoma','Macular degeneration','Retinal detachment','Dry eye disease','Astigmatism','Conjunctivitis'],tint:1,at:[1.65,2.25,0.72],dir:[1.3,0.72,0.55],amt:1.3,
+  hotspots:[
+   {id:'cornea',ta:'Cornea',label:'Cornea',detail:'Clear focusing surface',position:[-0.94,0.05,1.47]},
+   {id:'iris',ta:'Iris',label:'Iris',detail:'Controls light entry',position:[-1.22,-0.53,1.15]},
+   {id:'optic',ta:'Nervus opticus',label:'Optic nerve',detail:'Carries visual signals',position:[1.61,-0.18,0.54]}
+  ]},
+ {id:'lungs',file:'lungs.glb',name:'LUNGS',latin:'PULMONES',system:'RESPIRATORY SYSTEM',loc:'EITHER SIDE OF THE HEART',stamp:'11,000 L OF AIR',weight:'ABOUT 1 KG THE PAIR',tissue:'ALVEOLAR TISSUE',supply:'PULMONARY AND BRONCHIAL ARTERIES',fn:'EXCHANGES OXYGEN FOR CARBON DIOXIDE',poetic:'THE BREATH OF LIFE',medical:'Alveoli fold a tennis-court-sized exchange surface into the chest.',daily:'Moves around 11,000 L of air.',fun:'The right lung carries three lobes and the left only two, leaving a notch for the heart.',comparison:'Lungs vs. heart',conditions:['Asthma','COPD','Pneumonia','Pulmonary embolism','Pulmonary fibrosis','Bronchitis','Cystic fibrosis','Lung cancer'],tint:0,at:[-0.15,1.15,-0.08],dir:[-0.2,0.42,-0.18],amt:1.2,
+  hotspots:[
+   {id:'trachea',ta:'Trachea',label:'Trachea',detail:'Carries air to the lungs',position:[0,1.6,0.2]},
+   {id:'right-lung',ta:'Pulmo dexter',label:'Right lung',detail:'Three lobes',position:[-1.2,0.1,0.7]},
+   {id:'left-lung',ta:'Pulmo sinister',label:'Left lung',detail:'Two lobes, room for the heart',position:[1.2,0.1,0.7]},
+   {id:'bronchus',ta:'Bronchus principalis',label:'Bronchus',detail:'Branching airway',position:[-0.03,0.3,0.35]},
+   {id:'base',ta:'Basis pulmonis',label:'Lung base',detail:'Rests on the diaphragm',position:[-1.14,-1.2,1]}
+  ]},
+ {id:'heart',file:'heart.glb',name:'HEART',latin:'COR',system:'CARDIOVASCULAR',loc:'BEHIND THE STERNUM, SLIGHTLY LEFT',stamp:'100,000 BEATS',weight:'250–350 G',tissue:'CARDIAC MUSCLE',supply:'CORONARY ARTERIES',fn:'CIRCULATES OXYGENATED BLOOD',poetic:'THE TIRELESS PUMP',medical:'Its electrical rhythm coordinates every heartbeat.',daily:'Beats about 100,000 times.',fun:'It beats roughly 2.5 billion times in an average lifetime, and starts before you are born.',comparison:'Heart vs. brain',conditions:['Coronary artery disease','Arrhythmia','Heart valve disorders','Heart failure','Cardiomyopathy','Myocarditis','Atrial fibrillation','Congenital heart defects'],tint:1,at:[0.48,0.82,0.58],dir:[0.55,0.22,0.9],amt:1.25,
+  hotspots:[
+   {id:'aorta',ta:'Aorta',label:'Aorta',detail:'Main artery',position:[-0.35,1.65,0.55]},
+   {id:'left-atrium',ta:'Atrium sinistrum',label:'Left atrium',detail:'Receives oxygenated blood',position:[0.82,0.65,0.5]},
+   {id:'right-atrium',ta:'Atrium dextrum',label:'Right atrium',detail:'Receives venous blood',position:[-0.9,0.35,0.55]},
+   {id:'left-ventricle',ta:'Ventriculus sinister',label:'Left ventricle',detail:'Pumps to the body',position:[0.7,-0.75,0.65]},
+   {id:'right-ventricle',ta:'Ventriculus dexter',label:'Right ventricle',detail:'Pumps to the lungs',position:[-0.65,-0.68,0.66]},
+   {id:'mitral',ta:'Valva atrioventricularis sinistra',label:'Mitral valve',detail:'Prevents backflow',position:[0.18,-1.35,0.48]}
+  ]},
+ {id:'liver',file:'liver.glb',name:'LIVER',latin:'HEPAR',system:'DIGESTIVE SYSTEM',loc:'UPPER RIGHT ABDOMEN',stamp:'500 FUNCTIONS',weight:'1.4–1.6 KG',tissue:'HEPATIC LOBULES',supply:'HEPATIC ARTERY AND PORTAL VEIN',fn:'METABOLISM, DETOXIFICATION AND BILE',poetic:'THE QUIET ALCHEMIST',medical:'It can regenerate a substantial portion of lost tissue.',daily:'Performs more than 500 functions.',fun:'It is the only human organ that can regrow to full size from a fraction of itself.',comparison:'Liver vs. intestine',conditions:['Fatty liver disease','Hepatitis','Cirrhosis','Gallstones','Haemochromatosis','Liver cancer','Autoimmune hepatitis','Portal hypertension'],tint:1,at:[-1.15,0.12,0.38],dir:[-1.1,0.02,0.42],amt:1.2,
+  hotspots:[
+   {id:'right-lobe',ta:'Lobus hepatis dexter',label:'Right lobe',detail:'Largest hepatic lobe',position:[-0.75,0.35,0.75]},
+   {id:'left-lobe',ta:'Lobus hepatis sinister',label:'Left lobe',detail:'Crosses the midline',position:[0.85,0.25,0.75]},
+   {id:'portal',ta:'Vena portae hepatis',label:'Portal vein',detail:'Nutrient-rich inflow',position:[0.1,-0.3,0.82]}
+  ]},
+ {id:'pancreas',file:'pancreas.glb',name:'PANCREAS',latin:'PANCREAS',system:'ENDOCRINE SYSTEM',loc:'BEHIND THE STOMACH',stamp:'1.5 L OF JUICE',weight:'70–100 G',tissue:'PANCREATIC ACINI',supply:'SPLENIC AND PANCREATICODUODENAL',fn:'DIGESTIVE ENZYMES AND INSULIN',poetic:'THE QUIET REGULATOR',medical:'Islets of Langerhans release insulin and glucagon to balance blood sugar.',daily:'Makes about 1.5 L of enzyme-rich juice.',fun:'Barely 2% of it makes hormones; the rest is given over to digestive enzymes.',comparison:'Pancreas vs. liver',conditions:['Pancreatitis','Type 1 diabetes','Pancreatic cancer','Type 2 diabetes','Exocrine insufficiency','Pancreatic cysts','Gallstone pancreatitis','Insulinoma'],tint:0,at:[0.42,-0.22,0.48],dir:[0.45,-0.22,0.72],amt:1.15,
+  hotspots:[
+   {id:'head',ta:'Caput pancreatis',label:'Head',detail:'Cradled by the duodenum',position:[-1.32,-0.36,0.55]},
+   {id:'body',ta:'Corpus pancreatis',label:'Body',detail:'Crosses the spine',position:[0.05,0.25,0.45]},
+   {id:'tail',ta:'Cauda pancreatis',label:'Tail',detail:'Reaches the spleen',position:[1.55,0.3,0.35]},
+   {id:'duct',ta:'Ductus pancreaticus',label:'Pancreatic duct',detail:'Drains enzymes to the gut',position:[-0.61,0.39,0.5]}
+  ]},
+ {id:'kidneys',file:'kidneys.glb',name:'KIDNEYS',latin:'RENES',system:'URINARY SYSTEM',loc:'EITHER SIDE OF THE SPINE',stamp:'180 L FILTERED',weight:'120–170 G EACH',tissue:'RENAL CORTEX',supply:'RENAL ARTERIES',fn:'FILTERS BLOOD AND FORMS URINE',poetic:'THE MASTER FILTERS',medical:'Nephrons fine-tune the chemistry of the bloodstream.',daily:'Filters roughly 180 L of fluid.',fun:'They reclaim almost everything they filter — only about 1–2 L leaves the body as urine.',comparison:'Kidneys vs. liver',conditions:['Kidney stones','Chronic kidney disease','Urinary infection','Glomerulonephritis','Polycystic kidney disease','Renal hypertension','Acute kidney injury','Nephrotic syndrome'],tint:1,at:[0.08,-0.05,-0.95],dir:[0.12,-0.12,-1.1],amt:1.2,
+  hotspots:[
+   {id:'cortex',ta:'Cortex renalis',label:'Renal cortex',detail:'Outer filtering layer',position:[-0.9,0.55,0.7]},
+   {id:'medulla',ta:'Medulla renalis',label:'Renal medulla',detail:'Concentrates urine',position:[0.85,0.2,0.7]},
+   {id:'ureter',ta:'Ureter',label:'Ureter',detail:'Carries urine',position:[0.4,-1.1,0.5]}
+  ]},
+ {id:'intestine',file:'intestine.glb',name:'INTESTINE',latin:'INTESTINUM',system:'DIGESTIVE SYSTEM',loc:'CENTRAL AND LOWER ABDOMEN',stamp:'6–7 M EXTENDED',weight:'VARIES WITH CONTENTS',tissue:'INTESTINAL VILLI',supply:'MESENTERIC ARTERIES',fn:'DIGESTION AND NUTRIENT ABSORPTION',poetic:'THE INNER GARDEN',medical:'Its surface is amplified by folds, villi, and microvilli.',daily:'Hosts trillions of microorganisms.',fun:'Its lining renews itself every few days — the fastest turnover of any tissue in the body.',comparison:'Intestine vs. liver',conditions:['Irritable bowel syndrome','Inflammatory bowel disease','Celiac disease','Diverticulitis','Intestinal obstruction','Colorectal polyps',"Crohn's disease",'Lactose intolerance'],tint:1,at:[0,-1.72,0.18],dir:[0,-1.05,0.22],amt:1.35,
+  hotspots:[
+   {id:'duodenum',ta:'Duodenum',label:'Duodenum',detail:'First small-intestine segment',position:[0.6,0.8,0.75]},
+   {id:'jejunum',ta:'Jejunum',label:'Jejunum',detail:'Major absorption region',position:[-0.45,0.1,0.82]},
+   {id:'colon',ta:'Colon',label:'Colon',detail:'Reclaims water',position:[0.75,-0.55,0.72]}
+  ]},
+ {id:'skin',file:'skin.glb',name:'SKIN',latin:'INTEGUMENTUM',system:'INTEGUMENTARY SYSTEM',loc:'COVERING THE ENTIRE BODY',stamp:'2 M² SPREAD FLAT',weight:'3.5–5 KG',tissue:'EPIDERMAL LAYERS',supply:'DERMAL VASCULAR PLEXUS',fn:'PROTECTS, SENSES, AND COOLS',poetic:'THE LIVING BOUNDARY',medical:'Three layers — epidermis, dermis, and hypodermis — each with a distinct job.',daily:'Sheds around 500 million cells.',fun:'A single square centimetre can hold hundreds of sweat glands and metres of blood vessels.',comparison:'Skin vs. intestine',conditions:['Eczema','Psoriasis','Melanoma','Acne vulgaris','Cellulitis','Contact dermatitis','Rosacea','Vitiligo'],tint:0,at:[2.35,0.15,-0.15],dir:[1.5,0.05,-0.22],amt:1.4,
+  hotspots:[
+   {id:'epidermis',ta:'Epidermis',label:'Epidermis',detail:'Outer protective layer',position:[-0.05,0.88,1.4]},
+   {id:'dermis',ta:'Dermis',label:'Dermis',detail:'Nerves, vessels and glands',position:[0.29,0.05,1.4]},
+   {id:'hypodermis',ta:'Tela subcutanea',label:'Hypodermis',detail:'Fat and insulation',position:[-0.39,-1.15,1.4]},
+   {id:'follicle',ta:'Folliculus pili',label:'Hair follicle',detail:'Anchors each hair',position:[0.89,-0.44,1.4]}
+  ]}
+];
+
+let W=466,H=552;const $=s=>document.querySelector(s);
+const stage=$('#stage'),view=$('#view'),pinsEl=$('#pins');
+let S=1;
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setClearColor(0,0);view.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(14,W/H,0.1,400);
+const ISO=new THREE.Vector3(30,30,30),ORG=new THREE.Vector3(0,.45,0);
+cam.position.copy(ISO);
+const controls=new OrbitControls(cam,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.07;controls.target.copy(ORG);controls.enabled=false;
+const comp=new EffectComposer(renderer);
+comp.addPass(new RenderPass(scene,cam));
+const bloom=new UnrealBloomPass(new THREE.Vector2(W,H),0,.55,.62);
+comp.addPass(bloom);comp.addPass(new OutputPass());
+
+const U={uP:{value:0},uT:{value:0}};
+const RED=new THREE.Color(1,.16,.14);
+const GRN=new THREE.Color(.13,1,.30);
+function plateMat(red){
+  return new THREE.ShaderMaterial({
+    uniforms:{uP:U.uP,uT:U.uT,uTint:{value:(red?RED:GRN).clone()},uSel:{value:0}},
+    polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,
+    vertexShader:`varying vec3 w;varying vec3 n;void main(){vec4 p=modelMatrix*vec4(position,1.);w=p.xyz;n=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*viewMatrix*p;}`,
+    fragmentShader:`uniform float uP,uT,uSel;uniform vec3 uTint;varying vec3 w;varying vec3 n;
+void main(){vec3 b=vec3(.76,.745,.708)*(.94+.06*n.y);
+b=mix(b,uTint,.18+.16*uSel);
+float fres=pow(1.-clamp(abs(dot(normalize(n),normalize(cameraPosition-w))),0.,1.),1.65);
+b=mix(b,vec3(.102,.102,.102),fres*.8);
+float k=sin(w.y*3.-uT*2.2+w.x*1.5+w.z)*.5+.5;
+vec3 g=mix(vec3(.82,.12,.11),vec3(.1,.72,.22),k);
+gl_FragColor=vec4(mix(b,g,uP),1.);
+#include <colorspace_fragment>
+}`});
+}
+const lineMat=new THREE.LineBasicMaterial({color:0x1a1a1a});
+const INK=new THREE.Color(0x1a1a1a),GLOW=new THREE.Color(0x3dff62);
+const root=new THREE.Group();root.scale.setScalar(.95);scene.add(root);
+const parts=[];
+const plinthMat=plateMat(0);
+plinthMat.uniforms.uP={value:0};
+const slab=new THREE.BoxGeometry(5.6,.2,3.9);
+const plinth=new THREE.Group();
+plinth.add(new THREE.Mesh(slab,plinthMat));
+plinth.add(new THREE.LineSegments(new THREE.EdgesGeometry(slab,25),lineMat));
+plinth.position.set(0,-3.05,0);root.add(plinth);
+parts.push({g:plinth,b:plinth.position.clone(),d:new THREE.Vector3(0,-1,0),a:1.3});
+
+const rift=new THREE.Mesh(new THREE.PlaneGeometry(26,26),new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:U,
+vertexShader:`varying vec2 v;void main(){v=uv-.5;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+fragmentShader:`uniform float uP,uT;varying vec2 v;
+void main(){float r=length(v)*2.;float a=atan(v.y,v.x)+r*5.-uT*.8;
+float ring=exp(-pow((r-.55)*9.,2.))*(.55+.45*sin(a*6.+uT*2.));
+float core=exp(-r*r*5.)*.25;
+vec3 c=mix(vec3(1.,.16,.14),vec3(.13,1.,.30),.5+.5*sin(a*2.+uT));
+gl_FragColor=vec4(c*(ring+core)*uP*.7,1.);}`}));
+rift.visible=false;scene.add(rift);
+
+const FIT=3.8, SHOW=0.46;
+function dropMaps(material){
+  const list=Array.isArray(material)?material:[material];
+  list.forEach(m=>{
+    if(!m) return;
+    ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap'].forEach(k=>{
+      if(m[k]){m[k].dispose();m[k]=null}
+    });
+    m.dispose?.();
+  });
+}
+function mount(organ,gltf){
+  const model=gltf.scene;
+  model.updateMatrixWorld(true);
+  const box=new THREE.Box3().setFromObject(model);
+  const size=box.getSize(new THREE.Vector3());
+  const center=box.getCenter(new THREE.Vector3());
+  const s=FIT/Math.max(size.x,size.y,size.z,0.001);
+  model.scale.setScalar(s);
+  model.position.copy(center).multiplyScalar(-s);
+  const mats=[];
+  model.traverse(child=>{
+    if(!child.isMesh) return;
+    if(!child.geometry.attributes.normal) child.geometry.computeVertexNormals();
+    const mat=plateMat(organ.tint);
+    mats.push(mat);
+    dropMaps(child.material);
+    child.material=mat;
+    child.castShadow=false;child.receiveShadow=false;
+  });
+  const pivot=new THREE.Group();
+  pivot.rotation.set(0.05,-0.28,0);
+  pivot.scale.setScalar(SHOW);
+  pivot.add(model);
+  pivot.position.set(...organ.at);
+  root.add(pivot);
+  organ.pivot=pivot;organ.mats=mats;
+  parts.push({g:pivot,b:pivot.position.clone(),d:new THREE.Vector3(...organ.dir),a:organ.amt});
+  if(organ===ORGANS[idx]) buildPins();
+}
+
+let idx=3,hot=-1,pins=[];
+const tmp=new THREE.Vector3();
+function buildPins(){
+  pinsEl.replaceChildren();
+  const organ=ORGANS[idx];
+  if(!organ.pivot){pins=[];return}
+  pins=organ.hotspots.map((h,i)=>{
+    const d=document.createElement('div');
+    d.className='pin';d.textContent=String(i+1).padStart(2,'0');
+    d.title=`${h.ta} — ${h.detail}`;
+    d.onclick=ev=>{ev.stopPropagation();applyOrgan(idx,hot===i?-1:i)};
+    pinsEl.appendChild(d);
+    return {d,pivot:organ.pivot,off:new THREE.Vector3(...h.position),sel:i===hot};
+  });
+}
+function applyOrgan(i,h=-1){
+  idx=(i+ORGANS.length)%ORGANS.length;hot=h;
+  const o=ORGANS[idx];
+  ORGANS.forEach(org=>org.mats?.forEach(m=>{m.uniforms.uSel.value=org===o?1:0}));
+  $('#alias').innerHTML=`${o.system}<br>${o.latin}<br>${o.stamp}`;
+  $('#plateCode').textContent='AR-'+String(idx+1).padStart(2,'0');
+  $('#plateNo').textContent='PLATE '+String(idx+1).padStart(2,'0');
+  $('#c-kicker').innerHTML=`${String(idx+1).padStart(2,'0')}<br>${o.system}`;
+  $('#c-loc').textContent=o.loc;
+  $('#c-title').textContent=o.name;
+  $('#c-latin').textContent=o.latin;
+  const spot=h>=0?o.hotspots[h]:null;
+  $('#c-note').innerHTML=spot
+    ?`${spot.label.toUpperCase()}<br>${spot.ta}<br>${spot.detail.toUpperCase()}`
+    :`${o.supply}<br>${o.fun.toUpperCase()}`;
+  $('#c-spec').textContent=spot?spot.ta.toUpperCase():`${o.weight} · ${o.tissue}`;
+  $('#c-go').textContent=(spot?spot.detail:o.fn).toUpperCase()+' >';
+  $('#card').title=[o.poetic,o.medical,o.daily,o.comparison,o.conditions.join(', ')].join(' · ');
+  buildPins();
+}
+
+let mode='iso',ex=0,exT=0,portal=0,portalT=0;
+const drone=new THREE.CatmullRomCurve3([[-9,5,11],[-4,2.5,6.5],[-1.5,1.2,3.5],[1.5,.6,-4],[6,-.5,-2],[6.5,-1,4.5],[3.5,-1.8,6.5],[0,8,12],[-9,5,11]].slice(0,-1).map(p=>new THREE.Vector3(...p)),true,'catmullrom',.5);
+const look=new THREE.CatmullRomCurve3([[0,.5,0],[-1,1.6,0],[0,1.2,0],[0,.4,-1],[2.2,-1.4,2.2],[2.2,-1.2,2.2],[2.1,-1.3,2],[0,.5,0]].map(p=>new THREE.Vector3(...p)),true);
+const mbtn=[...document.querySelectorAll('[data-m]')];
+function setMode(m){
+  mode=m;controls.enabled=m==='orbit';
+  if(m==='drone'&&exT<.5){exT=.6;exr.value=.6}
+  document.querySelectorAll('#ctl [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  document.querySelectorAll('#rail .ix').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+}
+mbtn.forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+const exr=$('#exr');
+exr.oninput=()=>exT=+exr.value;
+$('#exb').onclick=()=>{exT=exT>.5?0:1;exr.value=exT};
+const tp=()=>{portalT=portalT?0:1;document.body.classList.toggle('portal',!!portalT)};
+$('#evt').onclick=tp;$('#num').addEventListener('click',e=>{if(e.target.closest('path,polygon'))tp()});
+$('#cls').onclick=ev=>{ev.stopPropagation();$('#card').style.display='none'};
+$('#next').onclick=()=>applyOrgan(idx+1);
+$('#up').onclick=()=>applyOrgan(idx-1);
+$('#c-go').parentElement.onclick=()=>applyOrgan(idx,hot<0?0:(hot+1)%ORGANS[idx].hotspots.length);
+addEventListener('keydown',e=>{
+  const m={1:'iso',2:'drone',3:'orbit'}[e.key];
+  if(m)setMode(m);
+  if(e.key==='e'||e.key==='E')$('#exb').click();
+  if(e.key==='p'||e.key==='P')tp();
+  if(e.key==='ArrowRight')applyOrgan(idx+1);
+  if(e.key==='ArrowLeft')applyOrgan(idx-1);
+});
+
+function resize(){
+  S=Math.min(innerWidth/736,innerHeight/552);
+  const SW=innerWidth/S,SH=innerHeight/S;
+  stage.style.width=SW+'px';stage.style.height=SH+'px';
+  stage.style.setProperty('--dy',(SH-552)+'px');
+  stage.style.transform=`scale(${S})`;
+  W=SW-270;H=SH;
+  for(const e of [view,pinsEl]){e.style.width=W+'px';e.style.height=H+'px'}
+  cam.aspect=W/H;cam.updateProjectionMatrix();
+  const cap=(navigator.hardwareConcurrency||8)<6?1.25:2;
+  const pr=Math.min(devicePixelRatio*S,cap);
+  renderer.setPixelRatio(pr);renderer.setSize(W,H,false);comp.setPixelRatio(pr);comp.setSize(W,H);bloom.resolution.set(W,H);
+}
+addEventListener('resize',resize);resize();
+
+const clk=new THREE.Clock(),bgA=new THREE.Color(0xD9D7D2),bgB=new THREE.Color(0x070a08);
+let dronet=0;
+function frame(){
+  const dt=Math.min(clk.getDelta(),.05);U.uT.value+=dt;
+  ex+=(exT-ex)*Math.min(1,dt*4);
+  portal+=(portalT-portal)*Math.min(1,dt*2.5);U.uP.value=portal;
+  parts.forEach(p=>p.g.position.copy(p.b).addScaledVector(p.d,p.a*ex));
+  lineMat.color.copy(INK).lerp(GLOW,portal);
+  const tf=mode==='drone'?42:14;cam.fov+=(tf-cam.fov)*Math.min(1,dt*3);cam.updateProjectionMatrix();
+  if(mode==='iso'){cam.position.lerp(ISO,Math.min(1,dt*4));controls.target.lerp(ORG,Math.min(1,dt*4));cam.lookAt(controls.target)}
+  else if(mode==='drone'){
+    dronet=(dronet+dt/28)%1;
+    cam.position.lerp(drone.getPointAt(dronet),Math.min(1,dt*3));
+    controls.target.lerp(look.getPointAt(dronet),Math.min(1,dt*3));cam.lookAt(controls.target);
+  }else controls.update();
+  rift.visible=portal>.01;
+  if(rift.visible){rift.position.copy(cam.position).sub(controls.target).normalize().multiplyScalar(-10).add(ORG);rift.lookAt(cam.position)}
+  bloom.strength=.42*portal;
+  if(portal>.01){scene.background=bgA.clone().lerp(bgB,portal);comp.render()}
+  else{scene.background=null;renderer.render(scene,cam)}
+  root.updateMatrixWorld(true);
+  const lit=portal>.5;
+  pins.forEach(p=>{
+    tmp.copy(p.off);p.pivot.localToWorld(tmp);tmp.project(cam);
+    const on=tmp.z<1;
+    p.d.style.display=on?'block':'none';
+    p.d.style.left=(tmp.x*.5+.5)*W+'px';
+    p.d.style.top=(-tmp.y*.5+.5)*H+'px';
+    const hotPin=lit||p.sel;
+    p.d.style.background=hotPin?'oklch(from #FF9436 l c 145)':'#1a1a1a';
+    p.d.style.color=hotPin?'#1a1a1a':'#fff';
+  });
+  requestAnimationFrame(frame);
+}
+frame();
+applyOrgan(3);
+
+const loader=new GLTFLoader();
+const fails=[];
+const modelBase='prisma-models/';
+(async()=>{
+  if(location.protocol==='file:'){
+    $('#evt').textContent='OPEN VIA SERVER';
+    $('#evt').title='This page cannot load the GLB models from a double-clicked file. In the Project- folder run: python -m http.server 8765 — then open http://127.0.0.1:8765/prisma-anatomy-assembly.html';
+    return;
+  }
+  $('#evt').textContent='DECODER';
+  try{await MeshoptDecoder.ready;loader.setMeshoptDecoder(MeshoptDecoder)}
+  catch(err){$('#evt').textContent='DECODER FAILED';$('#evt').title=String(err);return}
+  try{
+    const probe=await fetch(modelBase+'heart.glb',{method:'HEAD'});
+    if(probe.status===404){$('#evt').textContent='MODELS MISSING';$('#evt').title='Expected prisma-models/heart.glb beside this HTML file.';return}
+  }catch(err){$('#evt').textContent='MODELS BLOCKED';$('#evt').title=String(err);return}
+  for(let n=0;n<ORGANS.length;n++){
+    const i=(idx+n)%ORGANS.length;
+    const organ=ORGANS[i];
+    $('#evt').textContent=`READING ${n+1}/9`;
+    try{
+      const gltf=await Promise.race([
+        loader.loadAsync(modelBase+organ.file),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timed out')),45000))
+      ]);
+      mount(organ,gltf);
+    }catch(err){
+      fails.push(organ.name);
+      console.error(organ.file,err);
+    }
+    const done=n===ORGANS.length-1;
+    $('#evt').textContent=done?(fails.length?`${ORGANS.length-fails.length}/9 LOADED`:'EXPLODED VIEW 1'):`LOADING ${n+1}/9`;
+    if(done&&fails.length) $('#evt').title='Missing '+fails.join(', ');
+  }
+})();
+</script>
+</body>
+</html>
