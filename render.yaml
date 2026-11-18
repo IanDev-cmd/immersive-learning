@@ -2,8 +2,10 @@
 # https://render.com/docs/blueprint-spec
 services:
   - type: web
+    # Public URL: https://immersive-learning.onrender.com
     name: immersive-learning
     runtime: static
+    renderSubdomainPolicy: enabled
     buildCommand: echo "Publishing static files"
     staticPublishPath: .
     routes:
